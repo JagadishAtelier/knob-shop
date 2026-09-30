@@ -63,17 +63,20 @@ export const CartProvider = ({ children }) => {
     const storedUser = JSON.parse(localStorage.getItem("authUser"));
     const userId = storedUser?.id || storedUser?._id;
 
+    const getProductId = (x) => x?.productId?._id || x?.productId;
+    const targetProductId = getProductId(item);
+
     setCartItems((prev) => {
       const existingItem = prev.find(
         (i) =>
-          i.productId === item.productId &&
+          getProductId(i) === targetProductId &&
           i.colorCode === item.colorCode &&
           i.sizeLabel === item.sizeLabel
       );
 
       if (existingItem) {
         return prev.map((i) =>
-          i.productId === item.productId &&
+          getProductId(i) === targetProductId &&
             i.colorCode === item.colorCode &&
             i.sizeLabel === item.sizeLabel
             ? { ...i, quantity: i.quantity + item.quantity }
@@ -91,7 +94,7 @@ export const CartProvider = ({ children }) => {
       try {
         await addToCartAPI({
           userId,
-          productId: item.productId,
+          productId: targetProductId,
           colorCode: item.colorCode,
           colorName: item.colorName,
           sizeLabel: item.sizeLabel,
@@ -112,30 +115,37 @@ export const CartProvider = ({ children }) => {
     const storedUser = JSON.parse(localStorage.getItem("authUser"));
     const userId = storedUser?.id || storedUser?._id;
 
-    setCartItems((prev) =>
-      prev.filter(
-        (i) =>
-          !(
-            i.productId === item._id ||
-            (item.productId._id &&
-              i.colorCode === item.colorCode &&
-              i.sizeLabel === item.sizeLabel)
-          )
-      )
-    );
+    const getProductId = (x) => x?.productId?._id || x?.productId;
+    const targetProductId = getProductId(item);
 
     if (userId) {
       try {
         await deleteCartItem({
           userId,
-          productId: item.productId?._id || item.productId,
+          productId: targetProductId,
           colorCode: item.colorCode,
           sizeLabel: item.sizeLabel,
         });
       } catch (error) {
         console.error("Failed to remove item from backend:", error);
+        throw error;
       }
     }
+
+    setCartItems((prev) =>
+      prev.filter(
+        (i) => {
+          if (i._id && item._id) {
+            return i._id !== item._id;
+          }
+          return !(
+            getProductId(i) === targetProductId &&
+            i.colorCode === item.colorCode &&
+            i.sizeLabel === item.sizeLabel
+          );
+        }
+      )
+    );
   };
 
   // -----------------------------
@@ -145,10 +155,13 @@ export const CartProvider = ({ children }) => {
     const storedUser = JSON.parse(localStorage.getItem("authUser"));
     const userId = storedUser?.id || storedUser?._id;
 
+    const getProductId = (x) => x?.productId?._id || x?.productId;
+    const targetProductId = getProductId(item);
+
     setCartItems((prev) =>
       prev
         .map((i) =>
-          i.productId === item.productId &&
+          getProductId(i) === targetProductId &&
             i.colorCode === item.colorCode &&
             i.sizeLabel === item.sizeLabel
             ? {
@@ -164,7 +177,7 @@ export const CartProvider = ({ children }) => {
       try {
         await addToCartAPI({
           userId,
-          productId: item.productId,
+          productId: targetProductId,
           colorCode: item.colorCode,
           sizeLabel: item.sizeLabel,
           quantity: change,

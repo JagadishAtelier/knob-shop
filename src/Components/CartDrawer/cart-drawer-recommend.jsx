@@ -86,6 +86,10 @@ const RecommendedSlider = ({ recommendedItems = [], onAddToCart }) => {
                       item.variant?.[0]?.sizes?.[0]?.sellingPrice ||
                       item.price ||
                       0,
+                    price:
+                      item.variant?.[0]?.sizes?.[0]?.sellingPrice ||
+                      item.price ||
+                      0,
 
                     discountPercentage: item.variant?.[0]?.sizes?.[0]?.mrp
                       ? Math.round(

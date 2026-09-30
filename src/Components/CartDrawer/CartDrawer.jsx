@@ -19,6 +19,7 @@ const CartDrawer = ({
   const { updateCartItemQuantity, shareCurrentCart } = useCart();
   const [activeTab, setActiveTab] = useState(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [deletingItems, setDeletingItems] = useState({});
   // const [note, setNote] = useState("");
   // const [country, setCountry] = useState("India");
   // const [postalCode, setPostalCode] = useState("");
@@ -114,6 +115,22 @@ const CartDrawer = ({
   }, [show, cartItems]);
 
   // Inside your component, before return()
+  const handleDelete = async (item) => {
+    const itemKey = item._id || `${item.productId?._id || item.productId}-${item.colorCode || ""}-${item.sizeLabel || ""}`;
+    setDeletingItems((prev) => ({ ...prev, [itemKey]: true }));
+    try {
+      await onRemove(item);
+    } catch (error) {
+      console.error("Failed to remove item:", error);
+    } finally {
+      setDeletingItems((prev) => {
+        const copy = { ...prev };
+        delete copy[itemKey];
+        return copy;
+      });
+    }
+  };
+
   const handleIncrement = (item) => {
     updateCartItemQuantity(item, 1);
   };
@@ -273,6 +290,7 @@ const CartDrawer = ({
                             const finalPrice =
                               selectedSize?.sellingPrice || // matched size price
                               item.price || // fallback saved price
+                              item.sellingPrice || // fallback sellingPrice
                               matchedColorVariant?.sizes?.[0]?.sellingPrice || // fallback 1st size
                               0;
 
@@ -281,14 +299,29 @@ const CartDrawer = ({
                           X {item.quantity}
                         </span>
 
-                        <button
-                          className="btn btn-link btn-sm text-danger p-0"
-                          onClick={() => {
-                            onRemove(item);
-                          }}
-                        >
-                          <Trash2 color="red" />
-                        </button>
+                        {(() => {
+                          const itemKey = item._id || `${item.productId?._id || item.productId}-${item.colorCode || ""}-${item.sizeLabel || ""}`;
+                          const isDeleting = !!deletingItems[itemKey];
+                          return (
+                            <button
+                              className="btn btn-link btn-sm text-danger p-0 d-flex align-items-center justify-content-center"
+                              style={{ width: "24px", height: "24px" }}
+                              onClick={() => handleDelete(item)}
+                              disabled={isDeleting}
+                            >
+                              {isDeleting ? (
+                                <span
+                                  className="spinner-border spinner-border-sm text-danger"
+                                  role="status"
+                                  aria-hidden="true"
+                                  style={{ width: "16px", height: "16px" }}
+                                ></span>
+                              ) : (
+                                <Trash2 color="red" size={18} />
+                              )}
+                            </button>
+                          );
+                        })()}
                       </div>
                       <div className="quantity-box-cart-drawer">
                         <button

@@ -19,9 +19,12 @@ export const createCoupon = async (couponData) => {
 export const getAvailableCoupons = async () => {
   try {
     const token = localStorage.getItem("authToken");
-    const res = await axios.get(`${API_BASE}/available`, {
+    const res = await axios.get(`${API_BASE}/available?t=${new Date().getTime()}`, {
       headers: {
         Authorization: `Bearer ${token}`,
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       },
     });
     return res.data.coupons;

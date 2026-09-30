@@ -40,7 +40,6 @@ import BookConsult from "./Components/BookConsultatonPage/BookConsult/BookConsul
 import { Subpage } from "./Components/Subpage/Subpage";
 import WishlistDrawer from "./Components/WishlistDrawer/WishlistDrawer";
 import { useWishlist } from "./Context/WishlistContext";
-import Invoice from "./Components/Invoice/Invoice";
 import WhatsAppFloatButton from "./Components/WhatsAppFloatButton/WhatsAppFloatButton";
 import CCAvenueIframe from "./Components/PaymentPage/CCAvenueIframe";
 import LoginPage from "./Components/AuthenticationPage/LoginPage/LoginPage";
@@ -125,7 +124,6 @@ function App() {
           <Route path="/auth/forgot-password" element={<ForgotPassPage />} />
           <Route path="/auth/reset" element={<ResetPassPage />} />
           <Route path="/account" element={<ProfilePage />} />
-          <Route path="/invoice" element={<Invoice />} />
           <Route path="/invoice/verify/:orderId" element={<InvoiceVerification />} />
           <Route path="/offer" element={<OfferProducts />} />
           <Route path="/offer/todaysdeal" element={<OfferProducts />} />

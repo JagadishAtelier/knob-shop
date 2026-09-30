@@ -112,6 +112,7 @@ export default function ProductDetailsHead() {
 
     mrp: selectedSizeObj?.mrp || product?.compare_price || 0,
     sellingPrice: selectedSizeObj?.sellingPrice || product?.price || 0,
+    price: selectedSizeObj?.sellingPrice || product?.price || 0,
 
     // Calculated
     discountPercentage: selectedSizeObj?.mrp

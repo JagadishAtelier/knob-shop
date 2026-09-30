@@ -5,12 +5,14 @@ import image from "../../../Assets/New folder/New folder/4.png";
 import { getProductById } from "../../../API/productApi";
 import { Download, RotateCcw, Truck } from "lucide-react";
 import { useNavigate } from "react-router-dom"; // ✅ import navigate
+import { downloadInvoicePdf } from "../../../API/invoiceVerificationApi";
 
 function MyOrders({ userId }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [downloadingOrderId, setDownloadingOrderId] = useState(null);
 
   const navigate = useNavigate(); // ✅ initialize
 
@@ -81,23 +83,16 @@ function MyOrders({ userId }) {
   }, [loading, hasMore]);
 
   // ✅ Handle invoice download
-  const handleInvoice = (order) => {
-    localStorage.setItem(
-      "latestInvoiceData",
-      JSON.stringify({
-        shippingAddress:
-          order.deliveryOption === "ship" ? order.shippingData : null,
-        cartItems: order.items,
-        totalAmount: order.totalValue,
-        dtdcReferenceNumber:
-          order.deliveryOption === "ship" ? order.referenceNumber : "PICKUP",
-        userId: userId,
-        paymentMethod: "online",
-        invoiceDate: new Date().toLocaleDateString(),
-        orderId: order.orderId,
-      })
-    );
-    navigate("/invoice"); // ✅ redirect
+  const handleInvoice = async (order) => {
+    try {
+      setDownloadingOrderId(order.orderId);
+      await downloadInvoicePdf(order.orderId);
+    } catch (err) {
+      console.error("PDF download failed:", err);
+      alert("We could not download the invoice. Please contact support.");
+    } finally {
+      setDownloadingOrderId(null);
+    }
   };
 
   if (orders.length === 0 && !loading) return <p>No orders found.</p>;
@@ -157,8 +152,9 @@ function MyOrders({ userId }) {
                 <button
                   className="btn btn-dark m-0"
                   onClick={() => handleInvoice(order)} // ✅ call function
+                  disabled={downloadingOrderId === order.orderId}
                 >
-                  <Download size={16} /> Invoice
+                  <Download size={16} /> {downloadingOrderId === order.orderId ? "Downloading..." : "Invoice"}
                 </button></>
               )}
             </div>
